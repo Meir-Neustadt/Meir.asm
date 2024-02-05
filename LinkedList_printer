@@ -1,0 +1,90 @@
+dseg segment
+a dw 4cb4h 
+dw offset m 
+e dw 2879h 
+dw offset v 
+p dw 5e3fh 
+dw offset r
+m dw 0af4h
+dw offset e
+r dw 2061h 
+dw offset None
+v dw 6da7h 
+dw offset p
+None dw 2a89h 
+dw offset v
+dseg ends
+sseg segment stack
+dw 10h dup(0077h) 
+sseg ends
+
+cseg segment
+assume cs:cseg, ds:dseg, ss:sseg
+
+Print Proc
+mov bp, sp
+push ax
+push bx
+push dx
+mov bx, ss:[bp+2]
+mov ah, 2
+mov dx, bx
+and dx, 0f000h
+shr dx, 12
+cmp dl, 10
+jnc char1
+add dl, 48
+jmp pri1
+char1: add dl, 87
+pri1: int 21h
+mov dx, bx
+and dx, 0f00h
+shr dx, 8
+cmp dl, 10
+jnc char2
+add dl, 48
+jmp pri2
+char2: add dl, 87
+pri2: int 21h
+mov dx, bx
+and dx, 00f0h
+shr dx, 4
+cmp dl, 10
+jnc char3
+add dl, 48
+jmp pri3
+char3: add dl, 87
+pri3: int 21h
+mov dx, bx
+and dx, 000fh
+cmp dl, 10
+jnc char4
+add dl, 48
+jmp pri4
+char4: add dl, 87
+pri4: int 21h
+mov dl, ' '
+int 21h
+pop dx
+pop bx
+pop ax
+ret
+Print endp
+
+
+Begin:
+mov ax,dseg
+mov ds, ax
+mov cl, 0
+mov bx, offset a
+
+Shoov: cmp bx, offset None
+jz Sof
+inc cl
+push ds:[bx]
+call print
+mov bx, ds:[bx+2]
+jmp Shoov
+Sof: int 3h
+cseg ends
+end Begin
